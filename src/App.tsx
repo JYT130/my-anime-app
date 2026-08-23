@@ -23,9 +23,7 @@ function App() {
   };
 
   return (
-    <div
-      style={{ padding: "20px", fontFamily: "sans-serif", maxWidth: "500px" }}
-    >
+    <div style={{ fontFamily: "sans-serif", width: "100%" }}>
       <h1>アニメ視聴管理アプリ</h1>
 
       {/* アニメ追加フォーム */}
