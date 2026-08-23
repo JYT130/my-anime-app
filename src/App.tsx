@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Anime } from "./types/anime";
 import { AnimeForm } from "./components/AnimeForm";
-import { AnimeList } from "./components/AnimeList";
+import { AnimeTable } from "./components/AnimeTable";
 
 function App() {
   // アニメのState
@@ -30,7 +30,7 @@ function App() {
       <AnimeForm onAddAnime={handleAddAnime} />
 
       {/* UI */}
-      <AnimeList animeList={animeList} />
+      <AnimeTable animeList={animeList} />
     </div>
   );
 }

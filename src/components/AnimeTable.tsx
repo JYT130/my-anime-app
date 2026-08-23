@@ -4,7 +4,38 @@ type AnimeListProps = {
   animeList: Anime[];
 };
 
-export function AnimeList({ animeList }: AnimeListProps) {
+// 評価星描画コンポーネント
+const StarRating = ({ rating }: { rating: number }) => {
+  const percentage = (rating / 5) * 100;
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        display: "inline-block",
+        fontSize: "1rem",
+        color: "#ccc",
+      }}
+    >
+      ★★★★★
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: `${percentage}%`,
+          overflow: "hidden",
+          color: "#f59e0b",
+          whiteSpace: "nowrap",
+        }}
+      >
+        ★★★★★
+      </div>
+    </div>
+  );
+};
+
+export function AnimeTable({ animeList }: AnimeListProps) {
   return (
     <table
       style={{
@@ -35,6 +66,7 @@ export function AnimeList({ animeList }: AnimeListProps) {
       </thead>
       <tbody>
         {animeList.map((anime) => {
+          // ステータスに応じてバッジの色を変更
           const badgeColor = anime.status === "視聴中" ? "#e3f2fd" : "#e8f5e9";
           const badgeTextColor =
             anime.status === "視聴中" ? "#0d47a1" : "#1b5e20";
@@ -67,7 +99,7 @@ export function AnimeList({ animeList }: AnimeListProps) {
 
               {/* 評価（未入力ならハイフン） */}
               <td style={{ padding: "12px 8px" }}>
-                {anime.rating ? `★${anime.rating}` : "-"}
+                {anime.rating ? <StarRating rating={anime.rating} /> : "-"}
               </td>
 
               {/* 備考（未入力ならハイフン） */}
