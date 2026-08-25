@@ -1,11 +1,12 @@
 import { useState } from "react";
 import type { Anime } from "./types/anime";
 import { AnimeForm } from "./components/AnimeForm";
+import { AnimeToolBar } from "./components/AnimeToolBar";
 import { AnimeTable } from "./components/AnimeTable";
 
 function App() {
   // アニメのState
-  const [animeList, setAnimeList] = useState<Anime[]>([
+  const [animeTable, setAnimeTable] = useState<Anime[]>([
     { id: 1, title: "ガールズ＆パンツァー", status: "視聴中", year: 2026 },
     {
       id: 2,
@@ -17,20 +18,34 @@ function App() {
     },
   ]);
 
+  // 部分一致フィルタリング
+  const [searchTitle, setSearchTitle] = useState("");
+  const filteredAnimeList = animeTable.filter((anime) =>
+    anime.title.toLowerCase().includes(searchTitle.toLowerCase()),
+  );
+
   // アニメ追加処理
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const handleAddAnime = (newAnime: Anime) => {
-    setAnimeList([...animeList, newAnime]);
+    setAnimeTable([...animeTable, newAnime]);
   };
 
   return (
     <div style={{ fontFamily: "sans-serif", width: "100%" }}>
       <h1>アニメ視聴管理アプリ</h1>
+      {/* ツールバー */}
+      <AnimeToolBar
+        searchTitle={searchTitle}
+        onSearchTitleChange={setSearchTitle}
+        isFormOpen={isFormOpen}
+        onToggleOpen={() => setIsFormOpen(!isFormOpen)}
+      />
 
       {/* アニメ追加フォーム */}
-      <AnimeForm onAddAnime={handleAddAnime} />
+      {isFormOpen && <AnimeForm onAddAnime={handleAddAnime} />}
 
       {/* UI */}
-      <AnimeTable animeList={animeList} />
+      <AnimeTable animeList={filteredAnimeList} />
     </div>
   );
 }
