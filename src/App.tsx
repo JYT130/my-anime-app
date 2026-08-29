@@ -6,7 +6,7 @@ import { AnimeTable } from "./components/AnimeTable";
 
 function App() {
   // アニメのState
-  const [animeTable, setAnimeTable] = useState<Anime[]>([
+  const [animeList, setAnimeList] = useState<Anime[]>([
     { id: 1, title: "ガールズ＆パンツァー", status: "視聴中", year: 2026 },
     {
       id: 2,
@@ -16,18 +16,41 @@ function App() {
       rating: 3.8,
       comment: "Fate/SNを見たあと視聴するべきだったと後悔。",
     },
+    { id: 1, title: "ガールズ＆パンツァー", status: "視聴予定" },
   ]);
 
-  // 部分一致フィルタリング
+  // アニメテーブルフィルタリング
+  // タイトル部分一致
   const [searchTitle, setSearchTitle] = useState("");
-  const filteredAnimeList = animeTable.filter((anime) =>
-    anime.title.toLowerCase().includes(searchTitle.toLowerCase()),
-  );
+
+  // ステータス
+  const [statusFilter, setStatusFilter] = useState<
+    "すべて" | "視聴予定" | "視聴中" | "視聴済"
+  >("すべて");
+
+  // フィルタリングされたアニメリスト
+  const filteredAnimeList = animeList.filter((anime) => {
+    const matchesTitle = anime.title
+      .toLowerCase()
+      .includes(searchTitle.toLowerCase());
+    const matchesStatus =
+      statusFilter === "すべて" || anime.status === statusFilter;
+
+    return matchesTitle && matchesStatus;
+  });
+
+  // フィルターリセット処理
+  const handleResetFilters = () => {
+    // searchTitle を "" に戻す
+    setSearchTitle("");
+    // statusFilter を "すべて" に戻す
+    setStatusFilter("すべて");
+  };
 
   // アニメ追加処理
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [OnToggleOpen, setOnToggleOpen] = useState(false);
   const handleAddAnime = (newAnime: Anime) => {
-    setAnimeTable([...animeTable, newAnime]);
+    setAnimeList([...animeList, newAnime]);
   };
 
   return (
@@ -36,13 +59,16 @@ function App() {
       {/* ツールバー */}
       <AnimeToolBar
         searchTitle={searchTitle}
-        onSearchTitleChange={setSearchTitle}
-        isFormOpen={isFormOpen}
-        onToggleOpen={() => setIsFormOpen(!isFormOpen)}
+        statusFilter={statusFilter}
+        setSearchTitle={setSearchTitle}
+        setStatusFilter={setStatusFilter}
+        handleResetFilters={handleResetFilters}
+        isFormOpen={OnToggleOpen}
+        onToggleOpen={() => setOnToggleOpen(!OnToggleOpen)}
       />
 
       {/* アニメ追加フォーム */}
-      {isFormOpen && <AnimeForm onAddAnime={handleAddAnime} />}
+      {OnToggleOpen && <AnimeForm onAddAnime={handleAddAnime} />}
 
       {/* UI */}
       <AnimeTable animeList={filteredAnimeList} />
