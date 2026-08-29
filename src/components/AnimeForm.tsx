@@ -8,7 +8,9 @@ type AnimeFormProps = {
 
 export function AnimeForm({ onAddAnime }: AnimeFormProps) {
   const [inputTitle, setInputTitle] = useState("");
-  const [inputStatus, setInputStatus] = useState<"視聴中" | "視聴済">("視聴中");
+  const [inputStatus, setInputStatus] = useState<
+    "視聴予定" | "視聴中" | "視聴済"
+  >("視聴中");
   const [inputYear, setInputYear] = useState("");
   const [inputRating, setInputRating] = useState("");
   const [inputComment, setInputComment] = useState("");
@@ -29,7 +31,7 @@ export function AnimeForm({ onAddAnime }: AnimeFormProps) {
 
     setInputTitle("");
     setInputStatus("視聴中");
-    setInputYear(new Date().getFullYear().toString());
+    setInputYear("");
     setInputRating("");
     setInputComment("");
   };
@@ -53,10 +55,11 @@ export function AnimeForm({ onAddAnime }: AnimeFormProps) {
         <select
           value={inputStatus}
           onChange={(e) =>
-            setInputStatus(e.target.value as "視聴中" | "視聴済")
+            setInputStatus(e.target.value as "視聴予定" | "視聴中" | "視聴済")
           }
           style={{ padding: "6px" }}
         >
+          <option value="視聴予定">視聴予定</option>
           <option value="視聴中">視聴中</option>
           <option value="視聴済">視聴済</option>
         </select>

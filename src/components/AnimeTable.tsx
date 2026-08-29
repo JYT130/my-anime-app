@@ -2,6 +2,8 @@ import type { Anime } from "../types/anime";
 
 type AnimeListProps = {
   animeList: Anime[];
+  searchTitle: string;
+  statusFilter: "すべて" | "視聴予定" | "視聴中" | "視聴済";
 };
 
 // 評価星描画コンポーネント
@@ -35,7 +37,31 @@ const StarRating = ({ rating }: { rating: number }) => {
   );
 };
 
-export function AnimeTable({ animeList }: AnimeListProps) {
+// ステータスに応じた背景色と文字色のマッピング
+const STATUS_STYLE = {
+  視聴予定: { bg: "#fff3e0", color: "#df8714" },
+  視聴中: { bg: "#e3f2fd", color: "#0d47a1" },
+  視聴済: { bg: "#e8f5e9", color: "#1b5e20" },
+} as const;
+
+// アニメリストが空の場合のメッセージ表示分岐
+const EMPTY_MESSAGES = {
+  FILTERED: {
+    title: "該当するアニメが見つかりません",
+    description:
+      "検索キーワードやフィルター条件を変更して、再度お試しください。",
+  },
+  INITIAL: {
+    title: "登録されているアニメがありません",
+    description: "新しいアニメを追加してみましょう。",
+  },
+} as const;
+
+export function AnimeTable({
+  animeList,
+  searchTitle,
+  statusFilter,
+}: AnimeListProps) {
   return (
     <table
       style={{
@@ -65,50 +91,69 @@ export function AnimeTable({ animeList }: AnimeListProps) {
         </tr>
       </thead>
       <tbody>
-        {animeList.map((anime) => {
-          // ステータスに応じてバッジの色を変更
-          const badgeColor = anime.status === "視聴中" ? "#e3f2fd" : "#e8f5e9";
-          const badgeTextColor =
-            anime.status === "視聴中" ? "#0d47a1" : "#1b5e20";
+        {/* アニメリストが空の場合はメッセージ そうでない場合はアニメリストを表示 */}
+        {animeList.length === 0 ? (
+          <tr>
+            <td
+              colSpan={5}
+              style={{
+                padding: "12px 8px",
+                whiteSpace: "pre-line",
+                textAlign: "center",
+              }}
+            >
+              {searchTitle || statusFilter !== "すべて"
+                ? `${EMPTY_MESSAGES.FILTERED.title}\n${EMPTY_MESSAGES.FILTERED.description}`
+                : `${EMPTY_MESSAGES.INITIAL.title}\n${EMPTY_MESSAGES.INITIAL.description}`}
+            </td>
+          </tr>
+        ) : (
+          animeList.map((anime) => {
+            // ステータスに応じた背景色を取得
+            const style = STATUS_STYLE[anime.status];
 
-          return (
-            <tr key={anime.id} style={{ borderBottom: "1px solid #eee" }}>
-              {/* タイトル */}
-              <td style={{ padding: "12px 8px", fontWeight: "bold" }}>
-                {anime.title}
-              </td>
+            return (
+              <tr key={anime.id} style={{ borderBottom: "1px solid #eee" }}>
+                {/* タイトル */}
+                <td style={{ padding: "12px 8px", fontWeight: "bold" }}>
+                  {anime.title}
+                </td>
 
-              {/* ステータスバッジ */}
-              <td style={{ padding: "12px 8px" }}>
-                <span
-                  style={{
-                    backgroundColor: badgeColor,
-                    color: badgeTextColor,
-                    padding: "6px 12px",
-                    borderRadius: "16px",
-                    fontSize: "0.9em",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {anime.status}
-                </span>
-              </td>
+                {/* ステータスバッジ */}
+                <td style={{ padding: "12px 8px" }}>
+                  <span
+                    style={{
+                      backgroundColor: style.bg,
+                      color: style.color,
+                      padding: "6px 12px",
+                      borderRadius: "16px",
+                      fontSize: "0.9em",
+                      fontWeight: "bold",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {anime.status}
+                  </span>
+                </td>
 
-              {/* 視聴年度 */}
-              <td style={{ padding: "12px 8px" }}>{anime.year}年</td>
+                {/* 視聴年度（未入力ならハイフン） */}
+                <td style={{ padding: "12px 8px" }}>
+                  {anime.year !== undefined ? `${anime.year}年` : "-"}
+                </td>
 
-              {/* 評価（未入力ならハイフン） */}
-              <td style={{ padding: "12px 8px" }}>
-                {anime.rating ? <StarRating rating={anime.rating} /> : "-"}
-              </td>
+                {/* 評価（未入力ならハイフン） */}
+                <td style={{ padding: "12px 8px" }}>
+                  {anime.rating ? <StarRating rating={anime.rating} /> : "-"}
+                </td>
 
-              {/* 備考（未入力ならハイフン） */}
-              <td style={{ padding: "12px 8px", color: "#666" }}>
-                {anime.comment || "-"}
-              </td>
-            </tr>
-          );
-        })}
+                {/* 備考（未入力ならハイフン） */}
+                <td style={{ padding: "12px 8px", color: "#666" }}>
+                  {anime.comment || "-"}
+                </td>
+              </tr>
+            );
+          })
+        )}
       </tbody>
     </table>
   );

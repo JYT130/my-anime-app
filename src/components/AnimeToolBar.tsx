@@ -1,13 +1,21 @@
 type AnimeToolBarProps = {
   searchTitle: string;
-  onSearchTitleChange: (newTitle: string) => void;
+  statusFilter: string;
+  setSearchTitle: (newTitle: string) => void;
+  setStatusFilter: (
+    newStatus: "すべて" | "視聴予定" | "視聴中" | "視聴済",
+  ) => void;
+  handleResetFilters: () => void;
   isFormOpen: boolean;
   onToggleOpen: () => void;
 };
 
 export function AnimeToolBar({
   searchTitle,
-  onSearchTitleChange,
+  statusFilter,
+  setSearchTitle,
+  setStatusFilter,
+  handleResetFilters,
   isFormOpen,
   onToggleOpen,
 }: AnimeToolBarProps) {
@@ -32,7 +40,7 @@ export function AnimeToolBar({
             type="text"
             placeholder="🔍 アニメ名で部分一致検索..."
             value={searchTitle}
-            onChange={(e) => onSearchTitleChange(e.target.value)}
+            onChange={(e) => setSearchTitle(e.target.value)}
             style={{
               padding: "8px 12px",
               borderRadius: "6px",
@@ -44,16 +52,40 @@ export function AnimeToolBar({
           />
 
           <select
-            disabled
             style={{
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid #ccc",
               backgroundColor: "#f9f9f9",
             }}
+            value={statusFilter}
+            onChange={(e) =>
+              setStatusFilter(
+                e.target.value as "すべて" | "視聴予定" | "視聴中" | "視聴済",
+              )
+            }
           >
-            <option>すべて</option>
+            <option value="すべて">すべて</option>
+            <option value="視聴予定">視聴予定</option>
+            <option value="視聴中">視聴中</option>
+            <option value="視聴済">視聴済</option>
           </select>
+
+          <button
+            onClick={() => handleResetFilters()}
+            style={{
+              padding: "8px 12px",
+              backgroundColor: "#161718",
+              color: "#fff",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              whiteSpace: "nowrap",
+            }}
+          >
+            検索をリセット
+          </button>
         </div>
 
         {/* アコーディオントグルボタン */}
