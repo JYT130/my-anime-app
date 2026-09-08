@@ -16,7 +16,7 @@ function App() {
       rating: 3.8,
       comment: "Fate/SNを見たあと視聴するべきだったと後悔。",
     },
-    { id: 1, title: "ガールズ＆パンツァー", status: "視聴予定" },
+    { id: 3, title: "ガールズ＆パンツァー", status: "視聴予定" },
   ]);
 
   // アニメテーブルフィルタリング

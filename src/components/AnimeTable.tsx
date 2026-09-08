@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Anime } from "../types/anime";
 
 type AnimeListProps = {
@@ -62,6 +63,48 @@ export function AnimeTable({
   searchTitle,
   statusFilter,
 }: AnimeListProps) {
+  // ヘッダーソートコンポーネント
+  const [sortKey, setSortKey] = useState<"title" | "year" | "rating" | null>(
+    null,
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const handleSort = (clickedKey: typeof sortKey) => {
+    if (sortKey !== clickedKey) {
+      setSortKey(clickedKey);
+      setSortOrder("asc");
+      return;
+    }
+
+    if (sortOrder === "asc") {
+      setSortOrder("desc");
+    } else if (sortOrder === "desc") {
+      setSortOrder("asc");
+      setSortKey(null);
+    }
+  };
+  const sortedAnimeList = [...animeList].sort((a, b) => {
+    if (!sortKey) return 0;
+
+    const multiplier = sortOrder === "asc" ? 1 : -1;
+
+    if (sortKey === "title") {
+      return a.title.localeCompare(b.title) * multiplier;
+    }
+
+    if (sortKey === "year") {
+      const aYear = a.year ?? 0;
+      const bYear = b.year ?? 0;
+      return (aYear - bYear) * multiplier;
+    }
+
+    if (sortKey === "rating") {
+      const aRating = a.rating ?? 0;
+      const bRating = b.rating ?? 0;
+      return (aRating - bRating) * multiplier;
+    }
+
+    return 0;
+  });
   return (
     <table
       style={{
@@ -75,17 +118,29 @@ export function AnimeTable({
         <tr
           style={{ backgroundColor: "#f5f5f5", borderBottom: "2px solid #ddd" }}
         >
-          <th style={{ padding: "12px 8px", whiteSpace: "nowrap" }}>
-            タイトル
+          <th
+            onClick={() => handleSort("title")}
+            style={{ padding: "12px 8px", whiteSpace: "nowrap" }}
+          >
+            タイトル{" "}
+            {sortKey === "title" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
           </th>
           <th style={{ padding: "12px 8px", whiteSpace: "nowrap" }}>
             ステータス
           </th>
-          <th style={{ padding: "12px 8px", whiteSpace: "nowrap" }}>
-            視聴年度
+          <th
+            onClick={() => handleSort("year")}
+            style={{ padding: "12px 8px", whiteSpace: "nowrap" }}
+          >
+            視聴年度{" "}
+            {sortKey === "year" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
           </th>
-          <th style={{ padding: "12px 8px", whiteSpace: "nowrap" }}>
-            評価(1~5)
+          <th
+            onClick={() => handleSort("rating")}
+            style={{ padding: "12px 8px", whiteSpace: "nowrap" }}
+          >
+            評価(1~5){" "}
+            {sortKey === "rating" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
           </th>
           <th style={{ padding: "12px 8px" }}>備考</th>
         </tr>
@@ -108,7 +163,7 @@ export function AnimeTable({
             </td>
           </tr>
         ) : (
-          animeList.map((anime) => {
+          sortedAnimeList.map((anime) => {
             // ステータスに応じた背景色を取得
             const style = STATUS_STYLE[anime.status];
 
