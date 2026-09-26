@@ -1,6 +1,6 @@
 import type { Anime } from "../types/anime";
 
-//  スコア帯
+// スコア帯
 const SCORE_RANGES = [
   { min: 90, max: 100, label: "90-100点" },
   { min: 80, max: 89, label: "80-89点" },
@@ -12,9 +12,10 @@ const SCORE_RANGES = [
 
 interface ScoreGridProps {
   animeList: Anime[];
+  onSelectAnime: (anime: Anime) => void;
 }
 
-export function ScoreGrid({ animeList }: ScoreGridProps) {
+export function ScoreGrid({ animeList, onSelectAnime }: ScoreGridProps) {
   return (
     <div
       style={{
@@ -49,7 +50,12 @@ export function ScoreGrid({ animeList }: ScoreGridProps) {
                 filteredAnime.map((anime) => (
                   <div
                     key={anime.id}
-                    style={{ width: "100px", textAlign: "center" }}
+                    onClick={() => onSelectAnime(anime)} // 💡 カードクリック時に発火！
+                    style={{
+                      width: "100px",
+                      textAlign: "center",
+                      cursor: "pointer", // 💡 カーソルを指マークにする
+                    }}
                   >
                     <img
                       src={anime.imageUrl}
@@ -69,7 +75,10 @@ export function ScoreGrid({ animeList }: ScoreGridProps) {
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
                       }}
-                    ></div>
+                      title={anime.title}
+                    >
+                      {anime.title}
+                    </div>
                   </div>
                 ))
               )}

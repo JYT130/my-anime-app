@@ -1,8 +1,10 @@
-export type Anime = {
+export interface Anime {
   id: number;
   title: string;
-  score: number; // 0~100
+  score: number;
   imageUrl: string;
-  year?: number;
   comment?: string;
-};
+  startDate?: string;
+  subtype?: string;
+  episodeCount?: number;
+}
