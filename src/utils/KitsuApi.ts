@@ -7,6 +7,7 @@ export interface KitsuAnime {
     startDate?: string;
     subtype?: string;
     episodeCount?: number;
+  };
 }
 
 /**
