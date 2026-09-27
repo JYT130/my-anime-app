@@ -68,7 +68,7 @@ export function AddAnimeModal({
       startDate: selectedAnime.attributes.startDate,
       subtype: selectedAnime.attributes.subtype,
       episodeCount: selectedAnime.attributes.episodeCount,
-      kitsuId: selectedAnime.kitsuId,
+      kitsuId: selectedAnime.id,
     };
 
     onAddAnime(newAnime);
@@ -171,7 +171,7 @@ export function AddAnimeModal({
           }}
         >
           {searchResults.map((anime) => {
-            const isSelected = selectedAnime?.kitsuId === anime.kitsuId;
+            const isSelected = selectedAnime?.id === anime.id;
             const displayTitle =
               anime.attributes.titles?.ja_jp ||
               anime.attributes.titles?.en_jp ||
@@ -179,7 +179,7 @@ export function AddAnimeModal({
 
             return (
               <div
-                key={anime.kitsuId}
+                key={anime.id}
                 onClick={() => setSelectedAnime(anime)}
                 style={{
                   display: "flex",

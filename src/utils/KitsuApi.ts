@@ -1,5 +1,5 @@
 export interface KitsuAnime {
-  kitsuId: string;
+  id: string;
   attributes: {
     canonicalTitle: string;
     titles?: { ja_jp?: string; en_jp?: string };
@@ -10,9 +10,6 @@ export interface KitsuAnime {
   };
 }
 
-/**
- * Kitsu API を使用してアニメを検索する（高速・高安定）
- */
 export async function searchAnimeFromKitsu(
   query: string,
   timeoutMs = 5000,
@@ -33,11 +30,7 @@ export async function searchAnimeFromKitsu(
     }
 
     const json = await response.json();
-    // APIの "id" を "kitsuId" に変換して作成する
-    return json.data.map((item: any) => ({
-      kitsuId: item.id,
-      attributes: item.attributes,
-    }));
+    return json.data;
   } catch (error: unknown) {
     if (error instanceof Error && error.name === "AbortError") {
       throw (

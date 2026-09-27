@@ -8,7 +8,7 @@ export default function App() {
   const [animeList, setAnimeList] = useState<Anime[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAnime, setSelectedAnime] = useState<Anime | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // ★ 追加（初期値は true）
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // バックエンドからデータ一覧を取得する関数（自動でスコア降順で届く）
   const fetchAnimeList = () => {
@@ -16,7 +16,7 @@ export default function App() {
       .then((res) => res.json())
       .then((data: Anime[]) => setAnimeList(data))
       .catch((err) => console.error("データの取得に失敗しました:", err))
-      .finally(() => setIsLoading(false)); // ★ 成功しても失敗しても読み込み完了にする)
+      .finally(() => setIsLoading(false));
   };
 
   // 1. 初回読み込み時にデータベースから取得
