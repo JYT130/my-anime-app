@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// フロントエンドの型定義（Anime）に完全一致させたテーブル
+model Anime {
+  id           Int      @id @default(autoincrement())
+  title        String
+  score        Int
+  imageUrl     String
+  comment      String?
+  startDate    String?
+  subtype      String?
+  episodeCount Int?
+
+  // DB側の管理用（APIからの重複登録防止と時間記録）
+  kitsuId      String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Anime } from "../types/anime";
 
 interface AnimeDetailModalProps {
-  anime: Anime | null;
+  anime: Anime;
   isOpen: boolean;
   onClose: () => void;
   onUpdateAnime: (updatedAnime: Anime) => void;
@@ -16,15 +16,8 @@ export function AnimeDetailModal({
   onUpdateAnime,
   onDeleteAnime,
 }: AnimeDetailModalProps) {
-  const [score, setScore] = useState<number>(0);
-  const [comment, setComment] = useState<string>("");
-
-  useEffect(() => {
-    if (anime) {
-      setScore(anime.score);
-      setComment(anime.comment || "");
-    }
-  }, [anime]);
+  const [score, setScore] = useState<number>(anime.score);
+  const [comment, setComment] = useState<string>(anime.comment ?? "");
 
   if (!isOpen || !anime) return null;
 
@@ -46,8 +39,6 @@ export function AnimeDetailModal({
   };
 
   const handleClose = () => {
-    setScore(anime.score);
-    setComment(anime.comment || "");
     onClose();
   };
 

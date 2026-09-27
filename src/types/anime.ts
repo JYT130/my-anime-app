@@ -7,4 +7,8 @@ export interface Anime {
   startDate?: string;
   subtype?: string;
   episodeCount?: number;
+  kitsuId?: string;
 }
+
+// 送信用のデータ（IDなし)
+export type CreateAnimeInput = Omit<Anime, "id">;

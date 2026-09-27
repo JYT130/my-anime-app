@@ -1,5 +1,5 @@
 export interface KitsuAnime {
-  id: string;
+  kitsuId: string;
   attributes: {
     canonicalTitle: string;
     titles?: { ja_jp?: string; en_jp?: string };
@@ -33,13 +33,21 @@ export async function searchAnimeFromKitsu(
     }
 
     const json = await response.json();
-    return json.data ?? [];
+    // APIの "id" を "kitsuId" に変換して作成する
+    return json.data.map((item: any) => ({
+      kitsuId: item.id,
+      attributes: item.attributes,
+    }));
   } catch (error: unknown) {
     if (error instanceof Error && error.name === "AbortError") {
-      throw new Error(`通信がタイムアウトしました (${timeoutMs / 1000}秒)`);
+      throw (
+        new Error(`通信がタイムアウトしました (${timeoutMs / 1000}秒)`),
+        { cause: error }
+      );
     }
     throw new Error(
       "アニメ検索に失敗しました。時間をおいて再試行してください。",
+      { cause: error },
     );
   } finally {
     clearTimeout(timeoutId);

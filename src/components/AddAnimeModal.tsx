@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { searchAnimeFromKitsu, type KitsuAnime } from "../utils/kitsuApi";
-import type { Anime } from "../types/anime";
+import { searchAnimeFromKitsu, type KitsuAnime } from "../utils/KitsuApi";
+import type { CreateAnimeInput } from "../types/anime";
 
 interface AddAnimeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddAnime: (newAnime: Anime) => void;
+  onAddAnime: (newAnime: CreateAnimeInput) => void;
 }
 
 export function AddAnimeModal({
@@ -60,8 +60,7 @@ export function AddAnimeModal({
       selectedAnime.attributes.posterImage?.medium ||
       "https://placehold.co/100x140?text=No+Image";
 
-    const newAnime: Anime = {
-      id: Number(selectedAnime.id),
+    const newAnime: CreateAnimeInput = {
       title,
       score: userScore,
       imageUrl,
@@ -69,6 +68,7 @@ export function AddAnimeModal({
       startDate: selectedAnime.attributes.startDate,
       subtype: selectedAnime.attributes.subtype,
       episodeCount: selectedAnime.attributes.episodeCount,
+      kitsuId: selectedAnime.kitsuId,
     };
 
     onAddAnime(newAnime);
@@ -77,6 +77,7 @@ export function AddAnimeModal({
     setSelectedAnime(null);
     setSearchResults([]);
     setQuery("");
+    setUserScore(80);
     setUserComment("");
     setErrorMessage(null);
     onClose();
@@ -170,7 +171,7 @@ export function AddAnimeModal({
           }}
         >
           {searchResults.map((anime) => {
-            const isSelected = selectedAnime?.id === anime.id;
+            const isSelected = selectedAnime?.kitsuId === anime.kitsuId;
             const displayTitle =
               anime.attributes.titles?.ja_jp ||
               anime.attributes.titles?.en_jp ||
@@ -178,7 +179,7 @@ export function AddAnimeModal({
 
             return (
               <div
-                key={anime.id}
+                key={anime.kitsuId}
                 onClick={() => setSelectedAnime(anime)}
                 style={{
                   display: "flex",
