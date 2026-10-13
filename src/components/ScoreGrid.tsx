@@ -16,43 +16,6 @@ const SCORE_RANGES = [
 export function ScoreGrid({ animeList, onSelectAnime }: ScoreGridProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
-      {/* ★ ホバー時にテキストを流すスタイルの定義 */}
-      <style>{`
-  .anime-card-title-box {
-    width: 100px;
-    overflow: hidden;
-    white-space: nowrap;
-    margin-top: 6px;
-    font-size: 0.8rem;
-  }
-
-  .anime-card-title-inner {
-    display: inline-block;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    max-width: 100%;
-  }
-
-  /* 親カードにカーソルが乗った時だけ動かす */
-  .anime-card:hover .anime-card-title-inner {
-    text-overflow: clip;
-    overflow: visible;
-    max-width: none;
-    animation: scroll-title 3.5s linear infinite alternate;
-  }
-
-  /* 一定速度で左へスライドし、両端で少しだけ静止する設定 */
-  @keyframes scroll-title {
-    0%, 15% {
-      transform: translateX(0); /* 最初は少し止まる */
-    }
-    85%, 100% {
-      transform: translateX(calc(-100% + 100px)); /* 一定速度で左端まで流れて止まる */
-    }
-  }
-`}</style>
-
       {SCORE_RANGES.map((range) => {
         const filteredList = animeList.filter(
           (anime) => anime.score >= range.min && anime.score <= range.max,
@@ -102,7 +65,7 @@ export function ScoreGrid({ animeList, onSelectAnime }: ScoreGridProps) {
                   className="anime-card" /* ★ アニメーション連動用のクラス */
                   onClick={() => onSelectAnime(anime)}
                   style={{
-                    width: "126px",
+                    width: "147px",
                     textAlign: "center",
                     cursor: "pointer",
                     transition: "transform 0.2s ease",
@@ -118,28 +81,39 @@ export function ScoreGrid({ animeList, onSelectAnime }: ScoreGridProps) {
                     src={anime.imageUrl}
                     alt={anime.title}
                     style={{
-                      width: "126px",
-                      height: "180px",
+                      width: "147px",
+                      height: "210px",
                       objectFit: "cover",
                       borderRadius: "6px",
                       boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
                     }}
                   />
 
-                  {/* ★ 流れるタイトルエリア */}
-                  <div className="anime-card-title-box">
-                    <div className="anime-card-title-inner">
-                      <span
-                        style={{
-                          fontWeight: "bold",
-                          color: range.color,
-                          marginRight: "4px",
-                        }}
-                      >
-                        [{anime.score}点]
-                      </span>
-                      <span style={{ color: "#212529" }}>{anime.title}</span>
-                    </div>
+                  {/* ★ 折り返し全文表示タイトルエリア */}
+                  <div style={{ padding: "8px 0" }}>
+                    <span
+                      style={{
+                        fontWeight: "bold",
+                        color: range.color,
+                        marginRight: "6px",
+                        fontSize: "1rem",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      [{anime.score}点]
+                    </span>
+                    <span
+                      style={{
+                        color: "#212529",
+                        fontWeight: "bold",
+                        fontSize: "1rem",
+                        lineHeight: "1.4",
+                        wordBreak: "break-word", // 長いタイトルや英単語でも溢れずに折り返す
+                        whiteSpace: "normal", // 折り返しを許可
+                      }}
+                    >
+                      {anime.title}
+                    </span>
                   </div>
                 </div>
               ))}

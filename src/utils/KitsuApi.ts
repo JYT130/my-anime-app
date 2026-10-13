@@ -12,6 +12,7 @@ export interface KitsuAnime {
 
 export async function searchAnimeFromKitsu(
   query: string,
+  offset = 0,
   timeoutMs = 5000,
 ): Promise<KitsuAnime[]> {
   if (!query.trim()) return [];
@@ -21,7 +22,7 @@ export async function searchAnimeFromKitsu(
 
   try {
     const response = await fetch(
-      `https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(query)}&page[limit]=10`,
+      `https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(query)}&page[limit]=20&page[offset]=${offset}`,
       { signal: controller.signal },
     );
 
