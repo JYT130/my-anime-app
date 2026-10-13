@@ -1,75 +1,55 @@
-# React + TypeScript + Vite
+# 🎌 Anime Tracker App (アニメ管理・ポートフォリオアプリ)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+フルスタックのアニメスコアトラッキングWebアプリケーション。
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 📌 概要 (Overview)
 
-## React Compiler
+お気に入りのアニメをKitsu APIからリアルタイム検索して登録し、スコア管理（100点満点）や評価の可視化ができるCRUDアプリです。
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 📷 スクリーンショット / デモ (Screenshots & Demo)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+_(ここにScreenToGifなどで作成したGIFやスクショを貼り付けます)_
+`![App Demo](./demo.gif)`
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## ✨ 主な機能 (Features)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **Kitsu API 連携**: アニメタイトルを入力するだけで、外部APIから作品情報を自動サジェスト＆自動入力
+- **CRUD 操作**: アニメの新規登録、スコア編集、削除機能
+- **リアルタイムサマリー**: 登録総数や平均スコアなどの統計ヘッダーが即座に連動
 
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🛠️ 使用技術 (Tech Stack)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Frontend
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- React
+- TypeScript
+- CSS
 
-```
+### Backend
+
+- Node.js / Express
+- TypeScript (`tsx`)
+- Prisma (ORM)
+- SQLite (データベース)
+
+---
+
+## 🧪 テスト・動作確認 (Testing & Quality Assurance)
+
+---
+
+## 🚀 ローカルでの起動方法 (Getting Started)
+
+1. リポジトリのクローン
+   ```bash
+   git clone [https://github.com/JYT130/my-anime-app.git](https://github.com/JYT130/my-anime-app.git)
+   cd my-anime-app
+   ```

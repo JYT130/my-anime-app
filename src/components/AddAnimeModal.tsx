@@ -18,21 +18,30 @@ export function AddAnimeModal({
   const [selectedAnime, setSelectedAnime] = useState<KitsuAnime | null>(null); // 現在ユーザーが選択中のアニメ1件
   const [userScore, setUserScore] = useState<number>(80); // ユーザーが入力した評価点数（初期値80）
   const [userComment, setUserComment] = useState(""); // ユーザーが入力したメモ・感想
-  const [isLoading, setIsLoading] = useState(false); // 検索通信中かどうか（ボタンの二重押し防止・表示切り替え用）
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // エラーメッセージの文字列
+  const [isLoading, setIsLoading] = useState(false); // 初期検索通信中フラグ
+  const [isLoadingMore, setIsLoadingMore] = useState(false); // 追加読み込み中フラグ
+  const [offset, setOffset] = useState(0); // 取得開始位置
+  const [hasMore, setHasMore] = useState(true); // 次のページがあるかどうか
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // エラーメッセージ
 
   if (!isOpen) return null;
 
-  // 1. Kitsu API 検索処理
+  // 1. Kitsu API 初期検索処理（新規ワードで検索）
   const handleSearch = async () => {
     if (!query.trim()) return;
     setIsLoading(true);
     setErrorMessage(null);
+    setSelectedAnime(null);
+    setOffset(0);
+    setHasMore(true);
 
     try {
-      const results = await searchAnimeFromKitsu(query);
+      const results = await searchAnimeFromKitsu(query, 0);
       if (results.length === 0) {
         setErrorMessage("該当する作品が見つかりませんでした。");
+        setHasMore(false);
+      } else if (results.length < 20) {
+        setHasMore(false); // 20件未満なら次のページは存在しない
       }
       setSearchResults(results);
     } catch (error: unknown) {
@@ -46,7 +55,37 @@ export function AddAnimeModal({
     }
   };
 
-  // 2. アニメ登録処理
+  // 2. スクール最下部到達時の追加読み込み処理
+  const handleLoadMore = async () => {
+    if (!hasMore || isLoading || isLoadingMore || !query.trim()) return;
+
+    setIsLoadingMore(true);
+    const nextOffset = offset + 20;
+
+    try {
+      const newResults = await searchAnimeFromKitsu(query, nextOffset);
+      if (newResults.length < 20) {
+        setHasMore(false); // 取得結果が20件未満なら全件取得完了
+      }
+      setSearchResults((prev) => [...prev, ...newResults]); // 既存リストの末尾に追加
+      setOffset(nextOffset);
+    } catch (error) {
+      console.error("追加読み込みエラー:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  // 3. スクロールイベントハンドラー
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+    // 下部から 30px 手前に到達したら追加読み込みを発火
+    if (scrollHeight - scrollTop - clientHeight < 30) {
+      handleLoadMore();
+    }
+  };
+
+  // 4. アニメ登録処理
   const handleAdd = () => {
     if (!selectedAnime) return;
 
@@ -77,6 +116,8 @@ export function AddAnimeModal({
     setSelectedAnime(null);
     setSearchResults([]);
     setQuery("");
+    setOffset(0);
+    setHasMore(true);
     setUserScore(80);
     setUserComment("");
     setErrorMessage(null);
@@ -158,8 +199,9 @@ export function AddAnimeModal({
           </div>
         </div>
 
-        {/* 可変スクロール領域（検索候補一覧） */}
+        {/* 可変スクロール領域（検索候補一覧 & 無限スクロール検知） */}
         <div
+          onScroll={handleScroll}
           style={{
             flex: 1,
             overflowY: "auto",
@@ -213,6 +255,20 @@ export function AddAnimeModal({
               </div>
             );
           })}
+
+          {/* 追加読み込み中のインジケーター表示 */}
+          {isLoadingMore && (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "8px",
+                fontSize: "0.85rem",
+                color: "#666",
+              }}
+            >
+              さらに読み込み中...
+            </div>
+          )}
         </div>
 
         {/* 固定フッター（選択中アニメの入力・登録領域） */}
