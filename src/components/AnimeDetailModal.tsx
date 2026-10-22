@@ -16,7 +16,14 @@ export function AnimeDetailModal({
   onUpdateAnime,
   onDeleteAnime,
 }: AnimeDetailModalProps) {
-  const [score, setScore] = useState<number>(anime.score);
+  // status ステートを軸にして、現在の状態を管理する
+  const [status, setStatus] = useState<"COMPLETED" | "PLAN_TO_WATCH">(
+    anime.status,
+  );
+  const [priority, setPriority] = useState<"HIGH" | "MEDIUM" | "LOW">(
+    anime.priority || "MEDIUM",
+  );
+  const [score, setScore] = useState<number>(anime.score ?? 80);
   const [comment, setComment] = useState<string>(anime.comment ?? "");
 
   if (!isOpen || !anime) return null;
@@ -24,7 +31,9 @@ export function AnimeDetailModal({
   const handleSave = () => {
     const updatedAnime: Anime = {
       ...anime,
-      score,
+      status,
+      score: status === "COMPLETED" ? score : undefined,
+      priority: status === "PLAN_TO_WATCH" ? priority : undefined,
       comment: comment.trim() ? comment : undefined,
     };
     onUpdateAnime(updatedAnime);
@@ -38,13 +47,9 @@ export function AnimeDetailModal({
     }
   };
 
-  const handleClose = () => {
-    onClose();
-  };
-
   return (
     <div
-      onClick={handleClose}
+      onClick={onClose}
       style={{
         position: "fixed",
         top: 0,
@@ -90,7 +95,7 @@ export function AnimeDetailModal({
               {anime.title}
             </h2>
 
-            {/* 💡 タグ（バッジ）表示エリア */}
+            {/* バッジなど */}
             <div
               style={{
                 display: "flex",
@@ -99,7 +104,6 @@ export function AnimeDetailModal({
                 marginBottom: "8px",
               }}
             >
-              {/* 放送年 */}
               {anime.startDate && (
                 <span
                   style={{
@@ -114,8 +118,6 @@ export function AnimeDetailModal({
                   {anime.startDate.split("-")[0]}年
                 </span>
               )}
-
-              {/* メディア種別 */}
               {anime.subtype && (
                 <span
                   style={{
@@ -131,8 +133,6 @@ export function AnimeDetailModal({
                   {anime.subtype}
                 </span>
               )}
-
-              {/* 全〇話 */}
               {anime.episodeCount && (
                 <span
                   style={{
@@ -155,65 +155,203 @@ export function AnimeDetailModal({
           style={{ border: "none", borderTop: "1px solid #eee", margin: 0 }}
         />
 
-        {/* 編集フォームエリア */}
+        {/* フォームエリア：status によって完全に表示を切り替える */}
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {/* マイ評価 */}
-          <div
-            style={{
-              fontSize: "0.85rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            <label htmlFor="edit-score">マイ評価 (0-100点):</label>
-            <input
-              id="edit-score"
-              type="number"
-              min="0"
-              max="100"
-              value={score}
-              onChange={(e) => setScore(Number(e.target.value))}
-              style={{
-                width: "48px",
-                padding: "3px 6px",
-                textAlign: "right",
-                fontSize: "0.85rem",
-              }}
-            />
-            <span>点</span>
-          </div>
+          {status === "PLAN_TO_WATCH" ? (
+            /* --- 視聴予定の場合 --- */
+            <>
+              {/* 優先度選択 */}
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+              >
+                <label style={{ fontSize: "0.85rem", fontWeight: "bold" }}>
+                  優先度:
+                </label>
+                <div style={{ display: "flex", gap: "6px" }}>
+                  {(["HIGH", "MEDIUM", "LOW"] as const).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setPriority(p)}
+                      style={{
+                        flex: 1,
+                        padding: "6px",
+                        borderRadius: "4px",
+                        border: "none",
+                        fontWeight: "bold",
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                        backgroundColor:
+                          priority === p
+                            ? p === "HIGH"
+                              ? "#dc3545"
+                              : p === "MEDIUM"
+                                ? "#fd7e14"
+                                : "#6c757d"
+                            : "#e9ecef",
+                        color: priority === p ? "#fff" : "#495057",
+                      }}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          {/* メモ・感想 */}
-          <div
-            style={{
-              fontSize: "0.85rem",
-              display: "flex",
-              gap: "6px",
-              alignItems: "flex-start",
-            }}
-          >
-            <label
-              htmlFor="edit-comment"
-              style={{ whiteSpace: "nowrap", paddingTop: "4px" }}
-            >
-              メモ・感想 (任意):
-            </label>
-            <textarea
-              id="edit-comment"
-              placeholder="感想やメモを記述..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              rows={3}
-              style={{
-                flex: 1,
-                padding: "4px 6px",
-                fontSize: "0.85rem",
-                boxSizing: "border-box",
-                resize: "vertical",
-              }}
-            />
-          </div>
+              {/* メモ・感想 */}
+              <div
+                style={{
+                  fontSize: "0.85rem",
+                  display: "flex",
+                  gap: "6px",
+                  alignItems: "flex-start",
+                }}
+              >
+                <label
+                  htmlFor="edit-comment"
+                  style={{ whiteSpace: "nowrap", paddingTop: "4px" }}
+                >
+                  メモ・感想 (任意):
+                </label>
+                <textarea
+                  id="edit-comment"
+                  placeholder="感想やメモを記述..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  rows={3}
+                  style={{
+                    flex: 1,
+                    padding: "4px 6px",
+                    fontSize: "0.85rem",
+                    boxSizing: "border-box",
+                    resize: "vertical",
+                  }}
+                />
+              </div>
+
+              {/* status を "COMPLETED" に書き換える */}
+              <div
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  padding: "12px",
+                  borderRadius: "6px",
+                  textAlign: "center",
+                  border: "1px dashed #ced4da",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setStatus("COMPLETED")}
+                  style={{
+                    backgroundColor: "#28a745",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "8px 16px",
+                    fontWeight: "bold",
+                    fontSize: "0.9rem",
+                    cursor: "pointer",
+                    width: "100%",
+                  }}
+                >
+                  評価して視聴済みにする
+                </button>
+              </div>
+            </>
+          ) : (
+            /* --- 視聴済みの場合（または昇格後） --- */
+            <>
+              <div
+                style={{
+                  fontSize: "0.80rem",
+                  color: "#28a745",
+                  fontWeight: "bold",
+                  backgroundColor: "#d4edda",
+                  padding: "6px 10px",
+                  borderRadius: "4px",
+                }}
+              >
+                🎉 視聴済み作品として登録します
+              </div>
+
+              {/* マイ評価 */}
+              <div
+                style={{
+                  fontSize: "0.85rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <label htmlFor="edit-score">マイ評価 (0-100点):</label>
+                <input
+                  id="edit-score"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={score}
+                  onChange={(e) => setScore(Number(e.target.value))}
+                  style={{
+                    width: "48px",
+                    padding: "3px 6px",
+                    textAlign: "right",
+                    fontSize: "0.85rem",
+                  }}
+                />
+                <span>点</span>
+              </div>
+
+              {/* メモ・感想 */}
+              <div
+                style={{
+                  fontSize: "0.85rem",
+                  display: "flex",
+                  gap: "6px",
+                  alignItems: "flex-start",
+                }}
+              >
+                <label
+                  htmlFor="edit-comment"
+                  style={{ whiteSpace: "nowrap", paddingTop: "4px" }}
+                >
+                  メモ・感想 (任意):
+                </label>
+                <textarea
+                  id="edit-comment"
+                  placeholder="感想やメモを記述..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  rows={3}
+                  style={{
+                    flex: 1,
+                    padding: "4px 6px",
+                    fontSize: "0.85rem",
+                    boxSizing: "border-box",
+                    resize: "vertical",
+                  }}
+                />
+              </div>
+
+              {/* 視聴予定→視聴済みのキャンセル */}
+              {anime.status === "PLAN_TO_WATCH" && (
+                <button
+                  type="button"
+                  onClick={() => setStatus("PLAN_TO_WATCH")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#007bff",
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                    textAlign: "left",
+                    padding: 0,
+                  }}
+                >
+                  ◀ 視聴予定に戻す
+                </button>
+              )}
+            </>
+          )}
         </div>
 
         {/* ボタンエリア */}
@@ -242,7 +380,7 @@ export function AnimeDetailModal({
 
           <div style={{ display: "flex", gap: "8px" }}>
             <button
-              onClick={handleClose}
+              onClick={onClose}
               style={{
                 padding: "6px 12px",
                 cursor: "pointer",
