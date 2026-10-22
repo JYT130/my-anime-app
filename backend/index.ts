@@ -35,20 +35,25 @@ app.post("/api/anime", async (req, res) => {
       startDate,
       subtype,
       episodeCount,
+      status,
+      priority,
       kitsuId,
     } = req.body;
+
+    console.log("受け取ったリクエストボディ:", req.body);
 
     const newAnime = await prisma.anime.create({
       data: {
         title,
-        score: Number(score),
+        score: score !== null && score !== undefined ? Number(score) : null,
         imageUrl,
         comment,
         startDate,
         subtype,
         episodeCount: episodeCount ? Number(episodeCount) : null,
+        status: status,
+        priority: priority || null,
         kitsuId: kitsuId || null,
-        // idは自動採番
       },
     });
 
@@ -72,7 +77,11 @@ app.put("/api/anime/:id", async (req, res) => {
       startDate,
       subtype,
       episodeCount,
+      status,
+      priority,
     } = req.body;
+
+    console.log("受け取ったリクエストボディ:", req.body);
 
     const updatedAnime = await prisma.anime.update({
       where: { id },
@@ -84,6 +93,8 @@ app.put("/api/anime/:id", async (req, res) => {
         startDate,
         subtype,
         episodeCount: episodeCount ? Number(episodeCount) : null,
+        status,
+        priority: priority ?? null,
       },
     });
 

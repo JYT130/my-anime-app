@@ -11,12 +11,14 @@ datasource db {
 model Anime {
   id           Int      @id @default(autoincrement())
   title        String
-  score        Int
+  score        Int?
   imageUrl     String
   comment      String?
   startDate    String?
   subtype      String?
   episodeCount Int?
+  status       String   @default("COMPLETED") // "COMPLETED" or PLAN_TO_WATCH
+  priority     String? // "HIGH", "MIDIUM", "LOW"
 
   // DB側の管理用（APIからの重複登録防止と時間記録）
   kitsuId      String?  @unique

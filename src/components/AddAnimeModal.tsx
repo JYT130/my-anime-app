@@ -1,32 +1,38 @@
 import { useState } from "react";
-import { searchAnimeFromKitsu, type KitsuAnime } from "../utils/KitsuApi";
+import { fetchExploreAnimeFromKitsu, type KitsuAnime } from "../utils/KitsuApi";
 import type { CreateAnimeInput } from "../types/anime";
 
 interface AddAnimeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddAnime: (newAnime: CreateAnimeInput) => void;
+  defaultStatus: "COMPLETED" | "PLAN_TO_WATCH";
 }
 
 export function AddAnimeModal({
   isOpen,
   onClose,
   onAddAnime,
+  defaultStatus,
 }: AddAnimeModalProps) {
-  const [query, setQuery] = useState(""); // 検索窓に入力された文字列
-  const [searchResults, setSearchResults] = useState<KitsuAnime[]>([]); // APIから返ってきた検索結果の配列
-  const [selectedAnime, setSelectedAnime] = useState<KitsuAnime | null>(null); // 現在ユーザーが選択中のアニメ1件
-  const [userScore, setUserScore] = useState<number>(80); // ユーザーが入力した評価点数（初期値80）
-  const [userComment, setUserComment] = useState(""); // ユーザーが入力したメモ・感想
-  const [isLoading, setIsLoading] = useState(false); // 初期検索通信中フラグ
-  const [isLoadingMore, setIsLoadingMore] = useState(false); // 追加読み込み中フラグ
-  const [offset, setOffset] = useState(0); // 取得開始位置
-  const [hasMore, setHasMore] = useState(true); // 次のページがあるかどうか
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // エラーメッセージ
+  const [query, setQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<KitsuAnime[]>([]);
+  const [selectedAnime, setSelectedAnime] = useState<KitsuAnime | null>(null);
+  const [userScore, setUserScore] = useState<number>(80);
+  const [userComment, setUserComment] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [status, setStatus] = useState<"COMPLETED" | "PLAN_TO_WATCH">(
+    defaultStatus,
+  );
+  const [priority, setPriority] = useState<"HIGH" | "MEDIUM" | "LOW">("MEDIUM");
 
   if (!isOpen) return null;
 
-  // 1. Kitsu API 初期検索処理（新規ワードで検索）
+  // 1. 統合APIを使った検索処理
   const handleSearch = async () => {
     if (!query.trim()) return;
     setIsLoading(true);
@@ -36,12 +42,19 @@ export function AddAnimeModal({
     setHasMore(true);
 
     try {
-      const results = await searchAnimeFromKitsu(query, 0);
+      // 統合関数にテキスト検索クエリとして渡す
+      const results = await fetchExploreAnimeFromKitsu(
+        "-userCount",
+        "",
+        query,
+        0,
+        20,
+      );
       if (results.length === 0) {
         setErrorMessage("該当する作品が見つかりませんでした。");
         setHasMore(false);
       } else if (results.length < 20) {
-        setHasMore(false); // 20件未満なら次のページは存在しない
+        setHasMore(false);
       }
       setSearchResults(results);
     } catch (error: unknown) {
@@ -55,7 +68,7 @@ export function AddAnimeModal({
     }
   };
 
-  // 2. スクール最下部到達時の追加読み込み処理
+  // 2. 追加読み込み処理（20件ずつ）
   const handleLoadMore = async () => {
     if (!hasMore || isLoading || isLoadingMore || !query.trim()) return;
 
@@ -63,11 +76,17 @@ export function AddAnimeModal({
     const nextOffset = offset + 20;
 
     try {
-      const newResults = await searchAnimeFromKitsu(query, nextOffset);
+      const newResults = await fetchExploreAnimeFromKitsu(
+        "-userCount",
+        "",
+        query,
+        nextOffset,
+        20,
+      );
       if (newResults.length < 20) {
-        setHasMore(false); // 取得結果が20件未満なら全件取得完了
+        setHasMore(false);
       }
-      setSearchResults((prev) => [...prev, ...newResults]); // 既存リストの末尾に追加
+      setSearchResults((prev) => [...prev, ...newResults]);
       setOffset(nextOffset);
     } catch (error) {
       console.error("追加読み込みエラー:", error);
@@ -79,7 +98,6 @@ export function AddAnimeModal({
   // 3. スクロールイベントハンドラー
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
-    // 下部から 30px 手前に到達したら追加読み込みを発火
     if (scrollHeight - scrollTop - clientHeight < 30) {
       handleLoadMore();
     }
@@ -101,12 +119,14 @@ export function AddAnimeModal({
 
     const newAnime: CreateAnimeInput = {
       title,
-      score: userScore,
+      score: status === "COMPLETED" ? userScore : undefined,
       imageUrl,
       comment: userComment.trim() ? userComment : undefined,
       startDate: selectedAnime.attributes.startDate,
       subtype: selectedAnime.attributes.subtype,
       episodeCount: selectedAnime.attributes.episodeCount,
+      status,
+      priority: status === "PLAN_TO_WATCH" ? priority : undefined,
       kitsuId: selectedAnime.id,
     };
 
@@ -120,6 +140,8 @@ export function AddAnimeModal({
     setHasMore(true);
     setUserScore(80);
     setUserComment("");
+    setStatus(defaultStatus);
+    setPriority("MEDIUM");
     setErrorMessage(null);
     onClose();
   };
@@ -155,7 +177,9 @@ export function AddAnimeModal({
         {/* 固定ヘッダー領域 */}
         <div style={{ padding: "16px 20px 8px 20px" }}>
           <h2 style={{ margin: "0 0 12px 0", fontSize: "1.25rem" }}>
-            アニメを追加 (Kitsu API)
+            {status === "COMPLETED"
+              ? "視聴済みアニメを追加"
+              : "視聴予定アニメを追加"}
           </h2>
 
           {errorMessage && (
@@ -199,7 +223,7 @@ export function AddAnimeModal({
           </div>
         </div>
 
-        {/* 可変スクロール領域（検索候補一覧 & 無限スクロール検知） */}
+        {/* 可変スクロール領域 */}
         <div
           onScroll={handleScroll}
           style={{
@@ -256,7 +280,6 @@ export function AddAnimeModal({
             );
           })}
 
-          {/* 追加読み込み中のインジケーター表示 */}
           {isLoadingMore && (
             <div
               style={{
@@ -298,34 +321,76 @@ export function AddAnimeModal({
                 </strong>
               </div>
 
-              {/* マイ評価行（インライン配置・コンパクト化） */}
-              <div
-                style={{
-                  fontSize: "0.85rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}
-              >
-                <label htmlFor="user-score">マイ評価 (0-100点):</label>
-                <input
-                  id="user-score"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={userScore}
-                  onChange={(e) => setUserScore(Number(e.target.value))}
+              {/* ★ ステータスに応じて「スコア入力」または「優先度選択」を切り替え */}
+              {status === "COMPLETED" ? (
+                <div
                   style={{
-                    width: "48px",
-                    padding: "3px 6px",
-                    textAlign: "right",
                     fontSize: "0.85rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
                   }}
-                />
-                <span>点</span>
-              </div>
+                >
+                  <label htmlFor="user-score">マイ評価 (0-100点):</label>
+                  <input
+                    id="user-score"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={userScore}
+                    onChange={(e) => setUserScore(Number(e.target.value))}
+                    style={{
+                      width: "48px",
+                      padding: "3px 6px",
+                      textAlign: "right",
+                      fontSize: "0.85rem",
+                    }}
+                  />
+                  <span>点</span>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    fontSize: "0.85rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <label>優先度:</label>
+                  <div style={{ display: "flex", gap: "4px", flex: 1 }}>
+                    {(["HIGH", "MEDIUM", "LOW"] as const).map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPriority(p)}
+                        style={{
+                          flex: 1,
+                          padding: "4px 8px",
+                          borderRadius: "4px",
+                          border: "none",
+                          fontWeight: "bold",
+                          fontSize: "0.75rem",
+                          cursor: "pointer",
+                          backgroundColor:
+                            priority === p
+                              ? p === "HIGH"
+                                ? "#dc3545"
+                                : p === "MEDIUM"
+                                  ? "#fd7e14"
+                                  : "#6c757d"
+                              : "#e9ecef",
+                          color: priority === p ? "#fff" : "#495057",
+                        }}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              {/* メモ行（インラインラベル＋textarea） */}
+              {/* メモ行 */}
               <div
                 style={{
                   fontSize: "0.85rem",

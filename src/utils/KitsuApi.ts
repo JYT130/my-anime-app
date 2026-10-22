@@ -10,21 +10,36 @@ export interface KitsuAnime {
   };
 }
 
-export async function searchAnimeFromKitsu(
-  query: string,
+export type AnimeSortType = "-userCount" | "-averageRating" | "-startDate";
+
+/**
+ * ソート、放送年度、名前検索（テキスト）を同時に指定してアニメ一覧を取得する統合関数
+ */
+export async function fetchExploreAnimeFromKitsu(
+  sort: AnimeSortType = "-userCount",
+  year?: string,
+  textQuery?: string,
   offset = 0,
+  limit = 20,
   timeoutMs = 5000,
 ): Promise<KitsuAnime[]> {
-  if (!query.trim()) return [];
-
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetch(
-      `https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(query)}&page[limit]=20&page[offset]=${offset}`,
-      { signal: controller.signal },
-    );
+    let url = `https://kitsu.io/api/edge/anime?page[limit]=${limit}&page[offset]=${offset}&sort=${sort}`;
+
+    // 放送年度フィルターが指定されている場合
+    if (year && year.trim() !== "") {
+      url += `&filter[seasonYear]=${encodeURIComponent(year.trim())}`;
+    }
+
+    // 名前検索（テキスト）が指定されている場合
+    if (textQuery && textQuery.trim() !== "") {
+      url += `&filter[text]=${encodeURIComponent(textQuery.trim())}`;
+    }
+
+    const response = await fetch(url, { signal: controller.signal });
 
     if (!response.ok) {
       throw new Error(`HTTPエラー: ${response.status}`);
@@ -34,13 +49,12 @@ export async function searchAnimeFromKitsu(
     return json.data;
   } catch (error: unknown) {
     if (error instanceof Error && error.name === "AbortError") {
-      throw (
-        new Error(`通信がタイムアウトしました (${timeoutMs / 1000}秒)`),
-        { cause: error }
-      );
+      throw new Error(`通信がタイムアウトしました (${timeoutMs / 1000}秒)`, {
+        cause: error,
+      });
     }
     throw new Error(
-      "アニメ検索に失敗しました。時間をおいて再試行してください。",
+      "アニメの取得に失敗しました。時間をおいて再試行してください。",
       { cause: error },
     );
   } finally {
