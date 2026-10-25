@@ -18,7 +18,9 @@ export function ScoreGrid({ animeList, onSelectAnime }: ScoreGridProps) {
     <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
       {SCORE_RANGES.map((range) => {
         const filteredList = animeList.filter(
-          (anime) => anime.score >= range.min && anime.score <= range.max,
+          (anime) =>
+            (anime.score as number) >= range.min &&
+            (anime.score as number) <= range.max, // 視聴済みアニメにスコアは必ず存在する。
         );
 
         return (

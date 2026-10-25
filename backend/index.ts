@@ -110,6 +110,8 @@ app.delete("/api/anime/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
 
+    console.log("受け取ったID:", id);
+
     await prisma.anime.delete({
       where: { id },
     });
