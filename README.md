@@ -1,55 +1,50 @@
-# 🎌 Anime Tracker App (アニメ管理・ポートフォリオアプリ)
+# 僕のライフステージ (My LifeStage)
 
-フルスタックのアニメスコアトラッキングWebアプリケーション。
+Kitsu APIを活用したトレンドアニメの探索と、自身の視聴済み・視聴予定作品の管理をシームレスに行えるモダンなWebアプリケーションです。
 
----
+## 主な機能 (Features)
 
-## 📌 概要 (Overview)
+- ** ホーム（探索）タブ**
+  - **Kitsu API連携**: 人気順（トレンド）・高評価順・最新作順のソート切り替え。
+  - **放送年度フィルター**: 2000年〜現在までの年度別絞り込み。
+  - **リアルタイム名前検索**: 入力に応じて即座にアニメを検索。
+  - **無限スクロール**: 20件ごとのスムーズな自動追加読み込み。
+  - **ワンクリック登録**: 気になった作品を「視聴予定リスト」へ直接モーダル登録。
+- ** 視聴済みアニメ管理**
+  - 0〜100点でのマイ評価（スコア）入力。
+  - 登録作品全体の総視聴数および平均スコアの自動計算。
+- ** 視聴予定リスト管理**
+  - HIGH / MEDIUM / LOW の優先度（Priority）設定。
+  - 視聴予定から視聴済みへのスムーズなステータス移行。
+- ** 詳細・編集・削除モーダル**
+  - 登録後のスコア、優先度、メモ・感想のいつでも自由な更新。
 
-お気に入りのアニメをKitsu APIからリアルタイム検索して登録し、スコア管理（100点満点）や評価の可視化ができるCRUDアプリです。
+##  使用技術 (Tech Stack)
 
----
+- **Frontend**: React, TypeScript, Vite
+- **Backend / DB**: Node.js, Express, Prisma, SQLite
+- **API**: Kitsu API (REST / Edge API)
+- **Tooling**: concurrently (サーバー・クライアント同時起動)
 
-## 📷 スクリーンショット / デモ (Screenshots & Demo)
+## インストールから起動まで (Getting Started)
 
-_(ここにScreenToGifなどで作成したGIFやスクショを貼り付けます)_
-`![App Demo](./demo.gif)`
+### 1. 依存関係のインストール
+プロジェクトのルートディレクトリと、バックエンドディレクトリの両方でパッケージをインストールします。
 
----
+```bash
+# ルート（フロントエンド）のインストール
+npm install
 
-## ✨ 主な機能 (Features)
+# バックエンド側のインストール
+cd backend
+npm install
+cd ..
+```
 
-- **Kitsu API 連携**: アニメタイトルを入力するだけで、外部APIから作品情報を自動サジェスト＆自動入力
-- **CRUD 操作**: アニメの新規登録、スコア編集、削除機能
-- **リアルタイムサマリー**: 登録総数や平均スコアなどの統計ヘッダーが即座に連動
-
----
-
-## 🛠️ 使用技術 (Tech Stack)
-
-### Frontend
-
-- React
-- TypeScript
-- CSS
-
-### Backend
-
-- Node.js / Express
-- TypeScript (`tsx`)
-- Prisma (ORM)
-- SQLite (データベース)
-
----
-
-## 🧪 テスト・動作確認 (Testing & Quality Assurance)
-
----
-
-## 🚀 ローカルでの起動方法 (Getting Started)
-
-1. リポジトリのクローン
-   ```bash
-   git clone [https://github.com/JYT130/my-anime-app.git](https://github.com/JYT130/my-anime-app.git)
-   cd my-anime-app
-   ```
+### 2. アプリケーションの起動
+```bash
+npm run dev
+```
+### 3. ブラウザへのアクセス
+コンソールに表示されるローカルURL（```http://localhost:5173```）にアクセスする。
+   
