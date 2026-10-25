@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { KitsuAnime } from "../utils/KitsuApi";
 import type { CreateAnimeInput } from "../types/anime";
 
